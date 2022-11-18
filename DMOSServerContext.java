@@ -1,6 +1,7 @@
 package com.dmos.dmos_server;
 
 import com.dmos.dmos_server.channel.ChannelHandle;
+import com.google.gson.Gson;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -83,6 +84,7 @@ public class DMOSServerContext {
     // 消息发送
     public void sendTo(int id, Object o){
         Channel channel = getChannel(id);
-        channel.writeAndFlush(o);
+        if(channel != null && channel.isActive())
+            channel.writeAndFlush(new Gson().toJson(o));
     }
 }
