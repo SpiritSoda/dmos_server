@@ -12,4 +12,7 @@ public class ReportChangeLog {
         this.offline = offline;
         this.online = online;
     }
+    public boolean hasChange(){
+        return online.size() > 0 || offline.size() > 0;
+    }
 }
