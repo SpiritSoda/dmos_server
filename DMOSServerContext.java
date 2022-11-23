@@ -93,7 +93,8 @@ public class DMOSServerContext {
     }
     // 消息发送
     public void sendTo(int id, Object o){
-        Channel channel = getChannel(id);
+        int route = findRoute(id);
+        Channel channel = getChannel(route);
         if(channel != null && channel.isActive())
             channel.writeAndFlush(new Gson().toJson(o));
     }
