@@ -1,20 +1,28 @@
 package com.dmos.dmos_server;
 
+import com.dmos.dmos_common.data.ServerReportDTO;
+import com.dmos.dmos_server.tree.TreeNode;
 import com.dmos.dmos_server.channel.ChannelHandle;
+import com.dmos.dmos_server.tree.ReportChangeLog;
 import com.google.gson.Gson;
 import io.netty.channel.Channel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class DMOSServerContext {
+    // 当前节点通道
     private static Map<String, ChannelHandle> channels = new ConcurrentHashMap<>();
+    // 节点-通道映射
     private static Map<Integer, String> clients = new ConcurrentHashMap<>();
+    // 子树的节点关系
+    private Map<Integer, NodeRelation> nodes = new ConcurrentHashMap<>();
 
+    // ====================== channel相关操作 ============================ //
     // 基本channel操作
     public void saveChannel(Channel channel){
         channels.put(channel.id().asLongText(), new ChannelHandle(channel));
@@ -25,6 +33,8 @@ public class DMOSServerContext {
     }
 
     public Channel getChannel(int client){
+        if(!clients.containsKey(client))
+            return null;
         return channels.get(clients.get(client)).getChannel();
     }
     public ChannelHandle getChannelHandle(int client){
@@ -87,4 +97,72 @@ public class DMOSServerContext {
         if(channel != null && channel.isActive())
             channel.writeAndFlush(new Gson().toJson(o));
     }
+    // ====================== 节点相关操作 ============================ //
+
+    public HashSet<Integer> getChild(int id){
+        HashSet<Integer> child = new HashSet<>();
+        for(NodeRelation node: nodes.values()){
+            if(node.getParent() == id)
+                child.add(node.getId());
+        }
+        return child;
+    }
+    public TreeNode getTree(){
+        TreeNode root = new TreeNode(0);
+        root.setChild(getTreeChild(0));
+        return root;
+    }
+    private List<TreeNode> getTreeChild(int id){
+        List<TreeNode> nodes = new ArrayList<>();
+        HashSet<Integer> childs = getChild(id);
+        for(Integer child: childs){
+            TreeNode node = new TreeNode(child);
+            node.setChild(getTreeChild(child));
+            nodes.add(node);
+        }
+        return nodes;
+    }
+    // 获取前往节点id的路线
+    public int findRoute(int id){
+        int route = id;
+        if(!nodes.containsKey(id))
+            return -1;
+        while(!nodes.containsKey(route)){
+            route = nodes.get(route).getParent();
+        }
+        if(!clients.containsKey(route)){
+            nodes.remove(id);
+            return -1;
+        }
+        return route;
+    }
+    public ReportChangeLog report(ServerReportDTO reportDTO){
+        int id = reportDTO.getId();
+        HashSet<Integer> child = getChild(id);
+        List<Integer> online = new ArrayList<>(), offline = new ArrayList<>();
+        for(Integer node: reportDTO.getChild()){
+            if(!child.contains(node)){
+                online.add(node);
+                nodes.put(node, new NodeRelation(node, id));
+            }
+            else
+                child.remove(node);
+        }
+        for(Integer node: child){
+            offline.add(node);
+            nodes.remove(node);
+        }
+        return new ReportChangeLog(online, offline);
+    }
 }
+@Data
+@AllArgsConstructor
+class NodeRelation {
+    private int id;
+    private int parent;
+    @Override
+    public int hashCode(){
+        return id;
+    }
+}
+
