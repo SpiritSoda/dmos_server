@@ -48,6 +48,8 @@ public class DMOSServerContext {
 
     public void deleteChannel(String channel){
         ChannelHandle channelHandle = channels.remove(channel);
+        if(channelHandle == null)
+            return;
         if(channelHandle.established())
             clients.remove(channelHandle.getId());
     }
