@@ -20,7 +20,7 @@ public class DMOSServerContext {
     // 节点-通道映射
     private static Map<Integer, String> clients = new ConcurrentHashMap<>();
     // 子树的节点关系
-    private Map<Integer, NodeRelation> nodes = new ConcurrentHashMap<>();
+    private Map<Integer, Integer> nodes = new ConcurrentHashMap<>();
 
     // ====================== channel相关操作 ============================ //
     // 基本channel操作
@@ -102,9 +102,9 @@ public class DMOSServerContext {
 
     public HashSet<Integer> getChild(int id){
         HashSet<Integer> child = new HashSet<>();
-        for(NodeRelation node: nodes.values()){
-            if(node.getParent() == id)
-                child.add(node.getId());
+        for(Integer parent: nodes.values()){
+            if(parent == id)
+                child.add(parent);
         }
         return child;
     }
@@ -127,7 +127,7 @@ public class DMOSServerContext {
     public int findRoute(int id){
         int route = id;
         while(nodes.containsKey(route)){
-            route = nodes.get(route).getParent();
+            route = nodes.get(route);
         }
         if(!clients.containsKey(route)){
             nodes.remove(id);
@@ -142,7 +142,7 @@ public class DMOSServerContext {
         for(Integer node: reportDTO.getChild()){
             if(!child.contains(node)){
                 online.add(node);
-                nodes.put(node, new NodeRelation(node, id));
+                nodes.put(node, id);
             }
             else
                 child.remove(node);
@@ -152,16 +152,6 @@ public class DMOSServerContext {
             nodes.remove(node);
         }
         return new ReportChangeLog(online, offline, reportDTO.getTimestamp());
-    }
-}
-@Data
-@AllArgsConstructor
-class NodeRelation {
-    private int id;
-    private int parent;
-    @Override
-    public int hashCode(){
-        return id;
     }
 }
 
