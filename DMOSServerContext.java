@@ -125,8 +125,6 @@ public class DMOSServerContext {
     }
     // 获取前往节点id的路线
     public int findRoute(int id){
-        if(!nodes.containsKey(id))
-            return -1;
         int route = id;
         while(nodes.containsKey(route)){
             route = nodes.get(route).getParent();
