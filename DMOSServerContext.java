@@ -153,7 +153,7 @@ public class DMOSServerContext {
             offline.add(node);
             nodes.remove(node);
         }
-        return new ReportChangeLog(online, offline);
+        return new ReportChangeLog(online, offline, reportDTO.getTimestamp());
     }
 }
 @Data
