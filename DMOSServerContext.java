@@ -1,6 +1,7 @@
 package com.dmos.dmos_server;
 
 import com.dmos.dmos_common.data.ServerReportDTO;
+import com.dmos.dmos_common.util.ParseUtil;
 import com.dmos.dmos_server.tree.TreeNode;
 import com.dmos.dmos_server.channel.ChannelHandle;
 import com.dmos.dmos_server.tree.ReportChangeLog;
@@ -102,9 +103,9 @@ public class DMOSServerContext {
 
     public HashSet<Integer> getChild(int id){
         HashSet<Integer> child = new HashSet<>();
-        for(Integer parent: nodes.values()){
-            if(parent == id)
-                child.add(parent);
+        for(Integer node: nodes.keySet()){
+            if(nodes.get(node) == id)
+                child.add(node);
         }
         return child;
     }
@@ -126,7 +127,7 @@ public class DMOSServerContext {
     // 获取前往节点id的路线
     public int findRoute(int id){
         int route = id;
-        while(nodes.containsKey(route)){
+        while(nodes.containsKey(route) && !clients.containsKey(route)){
             route = nodes.get(route);
         }
         if(!clients.containsKey(route)){
