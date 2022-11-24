@@ -27,6 +27,6 @@ public class ChannelHandle {
         this.id = client;
     }
     public void heartbeat(boolean v){
-        this.heartbeat = heartbeat;
+        this.heartbeat = v;
     }
 }
