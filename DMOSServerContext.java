@@ -5,10 +5,7 @@ import com.dmos.dmos_common.util.ParseUtil;
 import com.dmos.dmos_server.tree.TreeNode;
 import com.dmos.dmos_server.channel.ChannelHandle;
 import com.dmos.dmos_server.tree.ReportChangeLog;
-import com.google.gson.Gson;
 import io.netty.channel.Channel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -115,7 +112,7 @@ public class DMOSServerContext {
     }
     public TreeNode getTree(){
         TreeNode root = new TreeNode(0);
-        root.setChild(getTreeChild(0));
+        root.setChildren(getTreeChild(0));
         return root;
     }
     private List<TreeNode> getTreeChild(int id){
@@ -123,7 +120,7 @@ public class DMOSServerContext {
         HashSet<Integer> childs = getChild(id);
         for(Integer child: childs){
             TreeNode node = new TreeNode(child);
-            node.setChild(getTreeChild(child));
+            node.setChildren(getTreeChild(child));
             nodes.add(node);
         }
         return nodes;

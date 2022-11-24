@@ -10,7 +10,7 @@ import java.util.List;
 @ToString
 public class TreeNode {
     private Integer id;
-    private List<TreeNode> child = new ArrayList<>();
+    private List<TreeNode> children = new ArrayList<>();
     public TreeNode(int id){
         this.id = id;
     }
