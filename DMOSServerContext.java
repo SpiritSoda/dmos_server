@@ -100,6 +100,13 @@ public class DMOSServerContext {
             channel.flush();
         }
     }
+    public void sendToWithoutFlush(int id, Object o){
+        int route = findRoute(id);
+        Channel channel = getChannel(route);
+        if(channel != null && channel.isActive()){
+            channel.write(ParseUtil.encode(o, false) + "\r");
+        }
+    }
     // ====================== 节点相关操作 ============================ //
 
     public HashSet<Integer> getChild(int id){
